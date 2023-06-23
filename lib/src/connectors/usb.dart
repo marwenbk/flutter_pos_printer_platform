@@ -94,7 +94,7 @@ class UsbPrinterConnector implements PrinterConnector<UsbPrinterInput> {
       final List<dynamic> results = await flutterPrinterChannel.invokeMethod('getList');
       return results
           .map((dynamic r) => PrinterDiscovered<UsbPrinterInfo>(
-                name: r['product'],
+                name: r['product'] == null ? 'unknown' : r['product'],
                 detail: UsbPrinterInfo.Android(
                   vendorId: r['vendorId'],
                   productId: r['productId'],
@@ -124,7 +124,7 @@ class UsbPrinterConnector implements PrinterConnector<UsbPrinterInput> {
       for (final device in results) {
         var r = await device;
         yield PrinterDevice(
-          name: r['product'],
+          name: r['product'] == null ? 'unknown' : r['product'],
           vendorId: r['vendorId'],
           productId: r['productId'],
           // name: r['name'],

@@ -1,3 +1,7 @@
+## 1.4.0
+
+* solved some bugs, support for ble printers iOS
+
 ## 1.3.2
 
 * bug profile

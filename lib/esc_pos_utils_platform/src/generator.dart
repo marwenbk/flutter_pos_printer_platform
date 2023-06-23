@@ -362,12 +362,8 @@ class Generator {
   ///
   /// Similar to [emptyLines] but uses an alternative command
   List<int> feed(int n) {
-    List<int> bytes = [];
-    if (n >= 0 && n <= 255) {
-      bytes += Uint8List.fromList(
-        List.from(cFeedN.codeUnits)..add(n),
-      );
-    }
+    var command = 0x0A;
+    List<int> bytes = List.filled(n, command);
     return bytes;
   }
 
@@ -376,12 +372,20 @@ class Generator {
   /// [mode] is used to define the full or partial cut (if supported by the priner)
   List<int> cut({PosCutMode mode = PosCutMode.full}) {
     List<int> bytes = [];
-    bytes += emptyLines(5);
+    bytes += feed(3);
     if (mode == PosCutMode.partial) {
       bytes += cCutPart.codeUnits;
     } else {
-      bytes += cCutFull.codeUnits;
+      bytes += [0x1d, 0x56, 0x42, 0x00];
     }
+    return bytes;
+  }
+
+  /// Open cash
+  ///
+  ///
+  List<int> openCash() {
+    List<int> bytes = [0x1b, 0x70, 0x00, 0x1e, 0xff, 0x00];
     return bytes;
   }
 

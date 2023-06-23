@@ -15,7 +15,7 @@ class SampleGattAttributes {
 
     companion object {
         const val HEART_RATE_MEASUREMENT = "00002a37-0000-1000-8000-00805f9b34fb"
-        const val CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb"
+        const val CLIENT_CHARACTERISTIC_CONFIG = "00002af1-0000-1000-8000-00805f9b34fb"
         // Unique UUID for this application
         val SPP_UUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb")
         private val attributes: HashMap<String, String> = HashMap()

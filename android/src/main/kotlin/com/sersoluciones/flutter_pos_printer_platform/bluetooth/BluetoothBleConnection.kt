@@ -112,7 +112,7 @@ class BluetoothBleConnection(
 //            }
 
             bluetoothGatt?.let { gatt ->
-                characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+                characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
                 characteristic.value = out
                 gatt.writeCharacteristic(mCharacteristic)
                 // Share the sent message back to the UI Activity
@@ -241,22 +241,26 @@ class BluetoothBleConnection(
         // Loops through available GATT Services.
         gattServices.forEach { gattService ->
             uuid = gattService.uuid.toString()
+            Log.d(TAG, " ------- service -> uuid: $uuid")
+            if (gattService.uuid == UUID.fromString("000018f0-0000-1000-8000-00805f9b34fb")) {
+                // Loops through available Characteristics.
+                gattService.characteristics.forEach { gattCharacteristic ->
 
-            // Loops through available Characteristics.
-            gattService.characteristics.forEach { gattCharacteristic ->
-                uuid = gattCharacteristic.uuid.toString()
-//                Log.d(
-//                    TAG,
-//                    " ------- gattCharacteristics -> name: ${
-//                        SampleGattAttributes.lookup(
-//                            uuid!!,
-//                            "Servicio desconocido"
-//                        )!!
-//                    } uuid: $uuid"
-//                )
+                    // Log.d(TAG, " ------- gattCharacteristics -> uuid: ${gattCharacteristic.uuid} value ${gattCharacteristic.value}")
+                    if (UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG) == gattCharacteristic.uuid) {
+//                        gatt.setCharacteristicNotification(characteristic, true)
+//
+//                        val descriptor: BluetoothGattDescriptor =
+//                            characteristic.getDescriptor(UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG))
+//                                ?: return
 
-                setCharacteristicNotification(gattCharacteristic)
+                        Log.d(TAG, " *************** BluetoothGatt descriptor ${gattCharacteristic.uuid}")
+                        mCharacteristic = gattCharacteristic
 
+//                        descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+//                        gatt.writeDescriptor(descriptor)
+                    }
+                }
             }
         }
 
@@ -316,62 +320,6 @@ class BluetoothBleConnection(
         buffer = arrayListOf()
 
     }
-
-    @Suppress("unused")
-    fun readCharacteristic(characteristic: BluetoothGattCharacteristic) {
-        bluetoothGatt?.readCharacteristic(characteristic) ?: run {
-            Log.w(TAG, "BluetoothGatt not initialized")
-            return
-        }
-    }
-
-    private fun setCharacteristicNotification(
-        characteristic: BluetoothGattCharacteristic
-    ) {
-        bluetoothGatt?.let { gatt ->
-
-//            if (UUID_MEASUREMENT == characteristic.uuid) {
-            gatt.setCharacteristicNotification(characteristic, true)
-
-            val descriptor: BluetoothGattDescriptor =
-                characteristic.getDescriptor(UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG))
-                    ?: return
-            mCharacteristic = characteristic
-//            Log.w(TAG, " *************** BluetoothGatt descriptor ${characteristic.uuid}")
-            descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-            gatt.writeDescriptor(descriptor)
-//            }
-        } ?: run {
-            Log.w(TAG, "BluetoothGatt not initialized")
-        }
-    }
-
-    @Suppress("unused")
-    fun disableNotifications(characteristic: BluetoothGattCharacteristic) {
-        bluetoothGatt?.let { gatt ->
-            characteristic.getDescriptor(UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG))
-                ?.let { cccDescriptor ->
-                    if (bluetoothGatt?.setCharacteristicNotification(
-                            characteristic,
-                            false
-                        ) == false
-                    ) {
-                        Log.e(
-                            "ConnectionManager",
-                            "setCharacteristicNotification failed for ${characteristic.uuid}"
-                        )
-                        return
-                    }
-
-                    cccDescriptor.value = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
-                    gatt.writeDescriptor(cccDescriptor)
-                } ?: Log.e(
-                "ConnectionManager",
-                "${characteristic.uuid} doesn't contain the CCC descriptor!"
-            )
-        }
-    }
-
 
     companion object {
 
