@@ -198,4 +198,14 @@ class UsbPrinterConnector implements PrinterConnector<UsbPrinterInput> {
     else
       return false;
   }
+
+  @override
+  Future<bool> printLogo() async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> image(Uint8List image, {int threshold = 150}) {
+    throw UnimplementedError();
+  }
 }

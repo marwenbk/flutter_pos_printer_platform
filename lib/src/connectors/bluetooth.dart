@@ -260,4 +260,15 @@ class BluetoothPrinterConnector implements PrinterConnector<BluetoothPrinterInpu
       return false;
     }
   }
+
+  @override
+  Future<bool> printLogo() async {
+    if (Platform.isAndroid) await flutterPrinterChannel.invokeMethod('printLogo');
+    return false;
+  }
+
+  @override
+  Future<bool> image(Uint8List image, {int threshold = 150}) {
+    throw UnimplementedError();
+  }
 }

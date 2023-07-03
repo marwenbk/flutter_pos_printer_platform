@@ -6,6 +6,8 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.hardware.usb.UsbDevice
 import android.os.Build
 import android.os.Handler
@@ -292,6 +294,22 @@ class FlutterPosPrinterPlatformPlugin : FlutterPlugin, MethodCallHandler, Plugin
                 val bytes: ArrayList<Int>? = call.argument("bytes")
                 printBytes(bytes, result)
             }
+            call.method.equals("printImage") -> {
+                val listInt: ArrayList<Int>? = call.argument("bytes")
+                var orientation: Int? = call.argument("orientation")
+                orientation = orientation ?: 0
+                val ints = listInt!!.toIntArray()
+                val bytes = ints.foldIndexed(ByteArray(ints.size)) { i, a, v -> a.apply { set(i, v.toByte()) } }
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                printBitmap(bitmap, orientation, result)
+            }
+            call.method.equals("printLogo") -> {
+                // align center
+//              setAlign(1)
+                val bitmap = BitmapFactory.decodeResource(context?.resources, R.drawable.ic_launcher)
+                // orientation portrait
+                printBitmap(bitmap, 1, result)
+            }
             else -> {
                 result.notImplemented()
             }
@@ -365,6 +383,12 @@ class FlutterPosPrinterPlatformPlugin : FlutterPlugin, MethodCallHandler, Plugin
         if (bytes == null) return
         adapter.setHandler(usbHandler)
         adapter.printBytes(bytes)
+        result.success(true)
+    }
+
+    private fun printBitmap(bitmap: Bitmap, orientation: Int, result: Result) {
+        bluetoothService.setHandler(bluetoothHandler)
+        bluetoothService.printBitmap(bitmap, orientation)
         result.success(true)
     }
 

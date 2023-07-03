@@ -9,6 +9,10 @@ import android.util.Log
 import com.sersoluciones.flutter_pos_printer_platform.bluetooth.SampleGattAttributes.Companion.CLIENT_CHARACTERISTIC_CONFIG
 import com.sersoluciones.flutter_pos_printer_platform.bluetooth.SampleGattAttributes.Companion.HEART_RATE_MEASUREMENT
 import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.*
 
 private const val TAG = "BluetoothBleConnection"
@@ -101,8 +105,32 @@ class BluetoothBleConnection(
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun write(out: ByteArray?) {
-        mCharacteristic?.let { characteristic ->
+        GlobalScope.launch {
+            Log.d(TAG, "Max Packet Size: ${out?.size}")
+            Log.d(TAG, "Connected to device")
+            val chunkSize = 500
+            if (out!!.size > chunkSize) {
+                var chunks: Int = out.size / chunkSize
+                if (out.size % chunkSize > 0) {
+                    ++chunks
+                }
+                for (i in 0 until chunks) {
+//                                val buffer: ByteArray = byteData.copyOfRange(i * chunkSize, chunkSize + i * chunkSize)
+                    val buffer: ByteArray = Arrays.copyOfRange(out, i * chunkSize, chunkSize + i * chunkSize)
+                    Log.d(TAG, "Print chunk $i size ${buffer.size}")
+                    mCharacteristic?.let { characteristic ->
+                        bluetoothGatt?.let { gatt ->
+                            characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                            characteristic.value = buffer
+                            gatt.writeCharacteristic(characteristic)
+                            delay(1500)
+                        } ?: error("Not connected to a BLE device!")
+                    }
+                }
+            } else {
+                mCharacteristic?.let { characteristic ->
 //            val writeType = when {
 //                characteristic.isWritable() -> BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
 //                characteristic.isWritableWithoutResponse() -> {
@@ -110,15 +138,16 @@ class BluetoothBleConnection(
 //                }
 //                else -> error("Characteristic ${characteristic.uuid} cannot be written to")
 //            }
-
-            bluetoothGatt?.let { gatt ->
-                characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                characteristic.value = out
-                gatt.writeCharacteristic(mCharacteristic)
-                // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(BluetoothConstants.MESSAGE_WRITE, -1, -1, out)
-                    .sendToTarget()
-            } ?: error("Not connected to a BLE device!")
+                    bluetoothGatt?.let { gatt ->
+                        characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                        characteristic.value = out
+                        gatt.writeCharacteristic(characteristic)
+                        // Share the sent message back to the UI Activity
+                        mHandler.obtainMessage(BluetoothConstants.MESSAGE_WRITE, -1, -1, out)
+                            .sendToTarget()
+                    } ?: error("Not connected to a BLE device!")
+                }
+            }
         }
     }
 

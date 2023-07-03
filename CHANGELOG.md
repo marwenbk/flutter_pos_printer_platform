@@ -1,3 +1,7 @@
+## 1.4.1
+
+* Bug Ble connection android: A characteristic value can only be 512 bytes long per specification, split the buffer
+
 ## 1.4.0
 
 * solved some bugs, support for ble printers iOS

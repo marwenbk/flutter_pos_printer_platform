@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -158,6 +159,10 @@ class BluetoothService(private var bluetoothHandler: Handler?) {
 
 
     fun onStartConnection(context: Context, address: String?, result: Result, isBle: Boolean = false, autoConnect: Boolean = false) {
+        Log.d(TAG, " ------------- isBle: $isBle is ble connection ${bluetoothConnection is BluetoothBleConnection}")
+        if ((isBle && bluetoothConnection !is BluetoothBleConnection) || (!isBle && bluetoothConnection is BluetoothBleConnection)) {
+            bluetoothDisconnect()
+        }
         if (bluetoothConnection == null)
             bluetoothConnection =
                 if (isBle) BluetoothBleConnection(mContext = context, bluetoothHandler!!, autoConnect = autoConnect)
@@ -206,6 +211,16 @@ class BluetoothService(private var bluetoothHandler: Handler?) {
 
     fun sendDataByte(bytes: ByteArray?): Boolean {
         if (bluetoothConnection?.state == BluetoothConstants.STATE_CONNECTED) {
+            bluetoothConnection?.write(bytes!!)
+            return true
+        }
+        return false
+    }
+
+    fun printBitmap(bitmap: Bitmap, orientation: Int): Boolean {
+        if (bluetoothConnection?.state == BluetoothConstants.STATE_CONNECTED) {
+//            val bytes = Utils.decodeBitmap(bitmap)
+            val bytes = ESCUtil.printBitmap(bitmap, orientation)
             bluetoothConnection?.write(bytes!!)
             return true
         }

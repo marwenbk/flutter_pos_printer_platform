@@ -188,4 +188,14 @@ class TcpPrinterConnector implements PrinterConnector<TcpPrinterInput> {
       },
     );
   }
+
+  @override
+  Future<bool> printLogo() async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> image(Uint8List image, {int threshold = 150}) {
+    throw UnimplementedError();
+  }
 }

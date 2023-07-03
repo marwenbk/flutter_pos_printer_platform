@@ -27,6 +27,9 @@ abstract class PrinterConnector<T> {
   Future<bool> send(List<int> bytes);
   Future<bool> connect(T model);
   Future<bool> disconnect({int? delayMs});
+
+  Future<bool> image(Uint8List image, {int threshold = 150});
+  Future<bool> printLogo();
 }
 
 abstract class GenericPrinter<T> extends Printer {
